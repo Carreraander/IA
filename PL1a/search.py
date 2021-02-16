@@ -16,8 +16,11 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
+from pyatspi import state
 
 import util
+from game import Agent
+
 
 class SearchProblem:
     """
@@ -70,7 +73,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -81,23 +85,43 @@ def depthFirstSearch(problem):
 
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
-    """
+
     print("Start:", problem.getStartState())
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    """
+    stack = util.Stack()
+    stack.push((problem.getStartState(), [], []))
 
-    "*** YOUR CODE HERE ***"
+    while stack.isEmpty() is not True:
+        [actual, dir, visitados] = stack.pop()
+        if problem.isGoalState(actual):
+            return camino
+        """
+        DEBUG
+        
+        print(actual)
+        print(dir)
+        print(visitados)
+        """
+        for [vecino, dir2, camino] in problem.getSuccessors(actual):
+            if vecino not in visitados:
+                stack.push((vecino, dir + [dir2], visitados + [actual]))
+                camino = dir + [dir2]
     util.raiseNotDefined()
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
+
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -105,6 +129,7 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
+
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
