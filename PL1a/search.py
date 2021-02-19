@@ -75,6 +75,16 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return [s, s, w, s, w, w, s, w]
 
+def BusquedaDFSBFS(problem,fringe):
+    fringe.push((problem.getStartState(), [], []))
+    while fringe.isEmpty() is not True:
+        [actual, dir, visitados] = fringe.pop()
+        if problem.isGoalState(actual):
+            return dir
+        for [vecino, dir2, camino] in problem.getSuccessors(actual):
+            if vecino not in visitados:
+                fringe.push((vecino, dir + [dir2], visitados + [actual]))
+                camino = dir + [dir2]
 
 def depthFirstSearch(problem):
     """
@@ -90,37 +100,32 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    stack = util.Stack()
-    stack.push((problem.getStartState(), [], []))
+    fringe = util.Stack()
+    return BusquedaDFSBFS(problem,fringe)
 
-    while stack.isEmpty() is not True:
-        [actual, dir, visitados] = stack.pop()
-        if problem.isGoalState(actual):
-            return camino
-        """
-        DEBUG
-        
-        print(actual)
-        print(dir)
-        print(visitados)
-        """
-        for [vecino, dir2, camino] in problem.getSuccessors(actual):
-            if vecino not in visitados:
-                stack.push((vecino, dir + [dir2], visitados + [actual]))
-                camino = dir + [dir2]
-    util.raiseNotDefined()
 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
-
+    fringe = util.Queue()
+    return BusquedaDFSBFS(problem,fringe)
+  
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = util.PriorityQueue()
+    fringe.push((problem.getStartState(), [], []),1)
+
+    while fringe.isEmpty() is not True:
+        [actual, dir, visitados] = fringe.pop()
+        if problem.isGoalState(actual):
+            return dir
+        for [vecino, dir2, camino] in problem.getSuccessors(actual):
+            if vecino not in visitados:
+                fringe.push((vecino, dir + [dir2], visitados + [actual]),problem.getCostOfActions(dir))
+                camino = dir + [dir2]
+
 
 
 def nullHeuristic(state, problem=None):
@@ -134,6 +139,17 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    fringe = util.ProrityQueue()
+    fringe.push((problem.getStartState(), [], [],1))
+
+    while fringe.isEmpty() is not True:
+        [actual, dir, visitados] = fringe.pop()
+        if problem.isGoalState(actual):
+            return dir
+        for [vecino, dir2, camino] in problem.getSuccessors(actual):
+            if vecino not in visitados:
+                fringe.push((vecino, dir + [dir2], visitados + [actual]),problem.getCostOfActions(dir)+ )
+                camino = dir + [dir2]
     util.raiseNotDefined()
 
 
