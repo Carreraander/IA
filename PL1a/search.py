@@ -65,6 +65,31 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
+def busquedaGrafo(fringe, problem):
+    visitados = []
+    fringe.push([(problem.getStartState(), "Final", 0)])
+    while not fringe.isEmpty():
+        camino = fringe.pop()
+        estadoActual = camino[-1][0]
+        if problem.isGoalState(estadoActual):
+            #Desde la posicion 1 ya que ignoramos el nodo raiz, que no tiene una accion en sí
+            return [estado[1] for estado in camino][1:]
+        if estadoActual not in visitados:
+            visitados.append(estadoActual)
+            for sucesor in problem.getSuccessors(estadoActual):
+                if sucesor[0] not in visitados:
+                    nuevoCamino = camino[:]
+                    nuevoCamino.append(sucesor)
+                    fringe.push(nuevoCamino)
+        """
+        DEBUG
+        
+        print(actual)
+        print(dir)
+        print(visitados)
+        """
+    return []
+
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -75,16 +100,6 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return [s, s, w, s, w, w, s, w]
 
-def BusquedaDFSBFS(problem,fringe):
-    fringe.push((problem.getStartState(), [], []))
-    while fringe.isEmpty() is not True:
-        [actual, dir, visitados] = fringe.pop()
-        if problem.isGoalState(actual):
-            return dir
-        for [vecino, dir2, camino] in problem.getSuccessors(actual):
-            if vecino not in visitados:
-                fringe.push((vecino, dir + [dir2], visitados + [actual]))
-                camino = dir + [dir2]
 
 def depthFirstSearch(problem):
     """
@@ -100,32 +115,27 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    fringe = util.Stack()
-    return BusquedaDFSBFS(problem,fringe)
-
+    borde = util.Stack()
+    return busquedaGrafo(borde, problem)
+    # util.raiseNotDefined()
 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    fringe = util.Queue()
-    return BusquedaDFSBFS(problem,fringe)
-  
+    borde = util.Queue()
+    return busquedaGrafo(borde, problem)
+    # util.raiseNotDefined()
+    
+
+
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    fringe = util.PriorityQueue()
-    fringe.push((problem.getStartState(), [], []),1)
-
-    while fringe.isEmpty() is not True:
-        [actual, dir, visitados] = fringe.pop()
-        if problem.isGoalState(actual):
-            return dir
-        for [vecino, dir2, camino] in problem.getSuccessors(actual):
-            if vecino not in visitados:
-                fringe.push((vecino, dir + [dir2], visitados + [actual]),problem.getCostOfActions(dir))
-                camino = dir + [dir2]
-
+    funcion = lambda camino: problem.getCostOfActions([estado[1] for estado in camino][1:])
+    borde = util.PriorityQueueWithFunction(funcion)
+    return busquedaGrafo(borde, problem)
+    # util.raiseNotDefined()
 
 
 def nullHeuristic(state, problem=None):
@@ -139,18 +149,10 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    fringe = util.ProrityQueue()
-    fringe.push((problem.getStartState(), [], [],1))
-
-    while fringe.isEmpty() is not True:
-        [actual, dir, visitados] = fringe.pop()
-        if problem.isGoalState(actual):
-            return dir
-        for [vecino, dir2, camino] in problem.getSuccessors(actual):
-            if vecino not in visitados:
-                fringe.push((vecino, dir + [dir2], visitados + [actual]),problem.getCostOfActions(dir)+ )
-                camino = dir + [dir2]
-    util.raiseNotDefined()
+    funcion = lambda camino: problem.getCostOfActions([estado[1] for estado in camino][1:]) + heuristic(camino[-1][0], problem)
+    borde = util.PriorityQueueWithFunction(funcion)
+    return busquedaGrafo(borde, problem)
+    # util.raiseNotDefined()
 
 
 # Abbreviations
