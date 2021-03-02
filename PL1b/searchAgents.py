@@ -481,10 +481,10 @@ def foodHeuristic(state, problem):
     maxcoste = 0
     for comida in Lista[:]:
         coste = mazeDistance(position,comida,problem.startingGameState)
-
+        #print("Coste hasta la proxima comida:",coste)
         if coste > maxcoste:
             maxcoste = coste
-
+            #print("Maximo coste:",maxcoste)
 
     return maxcoste
 
@@ -519,6 +519,9 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        return search.bfs(problem) #Mejor???
+        #return search.astar(problem)
+        #return search.ucs(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -555,6 +558,11 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
+        '''
+        Grid de True o False en funcion de si hay comida en esa posicion:
+            self.food
+        '''
+        return self.food[x][y]
         util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
