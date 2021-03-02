@@ -473,7 +473,7 @@ def foodHeuristic(state, problem):
     Algoritmo:
         Si el coste entre la posicion actual y la proxima comida es mas grande (importante no el mas peq) que el coste mayor encontrado:
             Guardar el coste 
-    Pasamos el mayor coste para que A* compruebe si su coste es mayor a ese y en ese caso desestime ese camino???
+    Pasamos el mayor coste como heristico
 
     '''
     #print(foodGrid.asList())
@@ -481,10 +481,10 @@ def foodHeuristic(state, problem):
     maxcoste = 0
     for comida in Lista[:]:
         coste = mazeDistance(position,comida,problem.startingGameState)
-        #print("Coste hasta la proxima comida:",coste)
+
         if coste > maxcoste:
             maxcoste = coste
-            #print("Maximo coste:",maxcoste)
+
 
     return maxcoste
 
