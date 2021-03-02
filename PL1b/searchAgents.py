@@ -464,7 +464,31 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+
+    '''
+    Estimacion del coste desde la posicion actual (position) hasta la proxima comida
+    f(e) = g(e) + h(e)
+    siendo g(e) el coste desde el nodo inicial hasta el final
+    y siendo h(e) el coste desde el nodo actual hasta el nodo final 
+    Algoritmo:
+        Si el coste entre la posicion actual y la proxima comida es mas grande (importante no el mas peq) que el coste mayor encontrado:
+            Guardar el coste 
+    Pasamos el mayor coste para que A* compruebe si su coste es mayor a ese y en ese caso desestime ese camino???
+
+    '''
+    #print(foodGrid.asList())
+    Lista = foodGrid.asList()
+    maxcoste = 0
+    for comida in Lista[:]:
+        coste = mazeDistance(position,comida,problem.startingGameState)
+        #print("Coste hasta la proxima comida:",coste)
+        if coste > maxcoste:
+            maxcoste = coste
+            #print("Maximo coste:",maxcoste)
+
+    return maxcoste
+
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
