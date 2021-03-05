@@ -67,10 +67,13 @@ class SearchProblem:
 
 def busquedaGrafo(fringe, problem):
     visitados = []
+
     fringe.push([(problem.getStartState(), "Final", 0)])
     while not fringe.isEmpty():
+
         camino = fringe.pop()
         estadoActual = camino[-1][0]
+        print(estadoActual)
         if problem.isGoalState(estadoActual):
             #Desde la posicion 1 ya que ignoramos el nodo raiz, que no tiene una accion en sí
             return [estado[1] for estado in camino][1:]

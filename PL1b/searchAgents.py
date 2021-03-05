@@ -269,7 +269,6 @@ def euclideanHeuristic(position, problem, info={}):
 class CornersProblem(search.SearchProblem):
     """
     This search problem finds paths through all four corners of a layout.
-
     You must select a suitable state space and successor function
     """
 
@@ -289,35 +288,28 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
 
-
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startingPosition,[]
-        util.raiseNotDefined()
+
+        state = (self.startingPosition, (0, 1, 2, 3))
+        return state
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        
-        if state[0] in self.corners:
-            if state[0] not in state[1]:
-                state[1].append(state[0])
-            if len(state[1]) == 4:
-                return True
-        else:
-            return False
-        util.raiseNotDefined()
+
+        return not state[1]
+
 
     def getSuccessors(self, state):
         """
         Returns successor states, the actions they require, and a cost of 1.
-
          As noted in search.py:
             For a given state, this should return a list of triples, (successor,
             action, stepCost), where 'successor' is a successor to the current
@@ -336,6 +328,28 @@ class CornersProblem(search.SearchProblem):
 
             "*** YOUR CODE HERE ***"
 
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextX, nextY = int(x + dx), int(y + dy)
+
+            if not self.walls[nextX][nextY]:
+                # Change state[1] if reaches corner
+                remainedCorners = state[1]
+                nextLocation = (nextX, nextY)
+                try:
+                    # Find out if the successor is a corner
+                    idx = self.corners.index(nextLocation)
+                except:
+                    pass
+                else:
+                    if idx in remainedCorners:
+                        temp = list(remainedCorners)
+                        temp.remove(idx)
+                        remainedCorners = tuple(temp)
+
+                nextState = (nextLocation, remainedCorners)
+                successors.append((nextState, action, 1))
+
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -351,7 +365,6 @@ class CornersProblem(search.SearchProblem):
             x, y = int(x + dx), int(y + dy)
             if self.walls[x][y]: return 999999
         return len(actions)
-
 
 def cornersHeuristic(state, problem):
     """
@@ -369,8 +382,32 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
+    #print(corners)
+    #print(walls)
+    #print(state)
+    #print(problem)
+
+
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+
+    Lista = corners
+    posicion = state[0]
+    #print(corners)
+    #print(state[0])
+    coste = 0
+    for comida in Lista[:]:
+        coste = coste + util.manhattanDistance(state[0],comida)
+        #print("Coste hasta la proxima comida:",coste)
+
+    # Posicion -> borde
+    # Maxdist *
+    # Mindist **
+    #   
+        
+
+    return coste
+    
+    #return 0
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
