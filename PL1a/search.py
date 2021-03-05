@@ -72,13 +72,10 @@ class SearchProblem:
  """
 def busquedaGrafo(fringe, problem):
     visitados = []
-
     fringe.push([(problem.getStartState(), "Final", 0)])
     while not fringe.isEmpty():
-
         camino = fringe.pop()
         estadoActual = camino[-1][0]
-        print(estadoActual)
         if problem.isGoalState(estadoActual):
             #Desde la posicion 1 ya que ignoramos el nodo raiz, que no tiene una accion en sí
             return [estado[1] for estado in camino][1:]
@@ -123,7 +120,7 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    # utilizamos un estac ya que utiliza el sistema 
+    # utilizamos un stac(pila) ya que utiliza el sistema LIFO
     borde = util.Stack()
     return busquedaGrafo(borde, problem)
     # util.raiseNotDefined()
@@ -132,6 +129,7 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    # utilizamos un queue(cola) ya que utiliza el sistema FIFO
     borde = util.Queue()
     return busquedaGrafo(borde, problem)
     # util.raiseNotDefined()
@@ -141,6 +139,7 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    # en este caso es una priorityqueue(cola de prioridad) que espande segun el "nodo más importante"
     funcion = lambda camino: problem.getCostOfActions([estado[1] for estado in camino][1:])
     borde = util.PriorityQueueWithFunction(funcion)
     return busquedaGrafo(borde, problem)
