@@ -65,6 +65,11 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
+ """
+ Este algoritmo de busqueda es el que comparten todos los algoritmos 
+ de busqueda ya que lo que importa es como guardas los datos
+ si en una pila,cola o cola de prioridad
+ """
 def busquedaGrafo(fringe, problem):
     visitados = []
     fringe.push([(problem.getStartState(), "Final", 0)])
@@ -115,6 +120,7 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
+    # utilizamos un estac ya que utiliza el sistema 
     borde = util.Stack()
     return busquedaGrafo(borde, problem)
     # util.raiseNotDefined()
