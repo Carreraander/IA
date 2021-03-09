@@ -294,22 +294,23 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-
-        state = (self.startingPosition, (0, 1, 2, 3))
-        return state
+        # La posición del pacman y una lista de esquinas visitadas
+        return (self.startingPosition, [])
+        # util.raiseNotDefined()
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-
-        return not state[1]
-
+        # Un estado es goal si se han tocado las 4 esquinas.
+        return len(state[1]) == 4
+        # util.raiseNotDefined()
 
     def getSuccessors(self, state):
         """
         Returns successor states, the actions they require, and a cost of 1.
+
          As noted in search.py:
             For a given state, this should return a list of triples, (successor,
             action, stepCost), where 'successor' is a successor to the current
@@ -327,29 +328,18 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-
-            x, y = state[0]
+            x,y = state[0]
+            esquinasVisitadas = list(state[1])
             dx, dy = Actions.directionToVector(action)
-            nextX, nextY = int(x + dx), int(y + dy)
-
-            if not self.walls[nextX][nextY]:
-                # Change state[1] if reaches corner
-                remainedCorners = state[1]
-                nextLocation = (nextX, nextY)
-                try:
-                    # Find out if the successor is a corner
-                    idx = self.corners.index(nextLocation)
-                except:
-                    pass
-                else:
-                    if idx in remainedCorners:
-                        temp = list(remainedCorners)
-                        temp.remove(idx)
-                        remainedCorners = tuple(temp)
-
-                nextState = (nextLocation, remainedCorners)
-                successors.append((nextState, action, 1))
-
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            # Si el posible sucesor no es una PARED, es un sucesor válido.
+            if not hitsWall:
+                nextStateCoord = (nextx, nexty)
+                if nextStateCoord in self.corners and not (nextStateCoord in esquinasVisitadas):
+                    esquinasVisitadas.append(nextStateCoord)
+                nextState = (nextStateCoord, esquinasVisitadas)
+                successors.append( ( nextState, action, 1) )
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
