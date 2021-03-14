@@ -509,7 +509,7 @@ def foodHeuristic(state, problem):
     for comida in Lista[:]:
         #Utilizamos mazeDistance ya que está incluido en el código proporcionado y se nos ha permitido
         #pero entendemos que es "trampa" ya que mazeDistance utiliza BFS, y no estimamos realmente nada,
-        #por lo que obtenemos 3/3 en la puntuación.
+        #por lo que obtenemos 4/3 en la puntuación.
         #En su lugar, podríamos utilizar manhattanDistance, que con este algoritmo para el heurístico
         #nos da una puntuación de 2/3, aceptable.
         coste = mazeDistance(position,comida,problem.startingGameState)
