@@ -72,9 +72,53 @@ class ReflexAgent(Agent):
         newFood = successorGameState.getFood()
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-
+        newGhostPos = currentGameState.getGhostPositions()
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        
+        #print("\n",newPos,newFood,currentGameState.getGhostPositions(),newScaredTimes)
+        #Cuanto mas lejos de un fantasma y mas cerca de una comida mejor
+        #Multiplicador distFantasma 0,5
+        #Multiplicador distComida 1
+        #Multiplicador distComerFantasma 2
+
+        tope = 1000
+        tope2 = 1000
+        for estasasustado in newScaredTimes:
+            if estasasustado is True:
+                #print(estasasustado)
+                for pos in newGhostPos:
+                    distmin = manhattanDistance(newPos,pos)
+                    #print("Distancia minima1: ",distmin)
+                    if distmin < tope:
+                        tope = distmin
+                #print(tope)
+                tope = tope*7
+            else:
+                #print(estasasustado)
+                for pos in newGhostPos:
+                    distmin = manhattanDistance(newPos,pos)
+                    #print("Distancia minima2: ",distmin)
+                    if distmin < tope:
+                        tope = distmin
+                #print(tope)
+                #tope = tope*0.25
+        
+        for comida in newFood.asList():
+            distmin = manhattanDistance(newPos,comida)
+            if distmin < tope2:
+                tope2 = distmin
+        
+        #tope2 = tope2*2
+        if tope >= tope2:
+            print("Hey")
+        if tope <= 2:
+            print("1")
+            print(tope,tope2)
+            return tope
+        else:
+            print("2")
+            return (tope + tope2)*3
+
 
 def scoreEvaluationFunction(currentGameState):
     """
