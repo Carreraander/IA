@@ -74,50 +74,31 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
         newGhostPos = currentGameState.getGhostPositions()
         "*** YOUR CODE HERE ***"
-        
-        #print("\n",newPos,newFood,currentGameState.getGhostPositions(),newScaredTimes)
-        #Cuanto mas lejos de un fantasma y mas cerca de una comida mejor
-        #Multiplicador distFantasma 0,5
-        #Multiplicador distComida 1
-        #Multiplicador distComerFantasma 2
+        """Para la evaluación, nos basaremos en las distancias a la comida y a los fantasmas.
+        Cuanto más cerca esté la comida, mejor puntuación, y cuanto más cerca esté el fantasma más cercano
+        peor."""
 
-        tope = 1000
-        tope2 = 1000
-        for estasasustado in newScaredTimes:
-            if estasasustado is True:
-                #print(estasasustado)
-                for pos in newGhostPos:
-                    distmin = manhattanDistance(newPos,pos)
-                    #print("Distancia minima1: ",distmin)
-                    if distmin < tope:
-                        tope = distmin
-                #print(tope)
-                tope = tope*7
-            else:
-                #print(estasasustado)
-                for pos in newGhostPos:
-                    distmin = manhattanDistance(newPos,pos)
-                    #print("Distancia minima2: ",distmin)
-                    if distmin < tope:
-                        tope = distmin
-                #print(tope)
-                #tope = tope*0.25
-        
-        for comida in newFood.asList():
-            distmin = manhattanDistance(newPos,comida)
-            if distmin < tope2:
-                tope2 = distmin
-        
-        #tope2 = tope2*2
-        if tope >= tope2:
-            print("Hey")
-        if tope <= 2:
-            print("1")
-            print(tope,tope2)
-            return tope
+        listaComida = newFood.asList()
+
+        #Buscamos el fantasma más cercano
+        fantasCerca = -min([manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates])
+
+        #Trataremos las distancias en negativo -> Se buscan las mínimas pero mayor es mejor
+        if fantasCerca:
+            fantasCerca = 10/fantasCerca #Reducimos el valor de esta distancia ya que tener comida más cerca tiene más peso
+        else: 
+            fantasCerca= float('-inf') #Escogemos este valor si no hay fantasmas para que el no haber fantasmas no interfiera en el resultado
+
+        if listaComida:
+            comidaCerca = -3*min([manhattanDistance(newPos, comida) for comida in listaComida]) #No reducimos el valor de la comida ya que tiene más peso, se lo aumentamos
         else:
-            print("2")
-            return (tope + tope2)*3
+            comidaCerca = 0 #Si no hay comida hacemos que el único valor que se tenga en cuenta sea el de los fantasmas
+
+        """Definimos el peso como la comida restante; le ifnluyen los valores calculados.
+        El peso se multiplica por un número alto para que los valores calculados no influyan tanto el valor final"""
+        valorTotal = comidaCerca + fantasCerca - (100*len(listaComida))
+        #print(valorTotal)
+        return valorTotal
 
 
 def scoreEvaluationFunction(currentGameState):
@@ -154,7 +135,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
     Your minimax agent (question 2)
     """
-
     def getAction(self, gameState):
         """
         Returns the minimax action from the current gameState using self.depth
@@ -179,7 +159,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        print(self.depth)
+        #util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -190,7 +171,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
