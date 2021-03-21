@@ -74,11 +74,16 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
         newGhostPos = currentGameState.getGhostPositions()
         "*** YOUR CODE HERE ***"
-        """Para la evaluación, nos basaremos en las distancias a la comida y a los fantasmas.
-        Cuanto más cerca esté la comida, mejor puntuación, y cuanto más cerca esté el fantasma más cercano
+        """Para la evaluacion, nos basaremos en las distancias a la comida y a los fantasmas.
+        Cuanto más cerca este la comida, mejor puntuacion, y cuanto más cerca esté el fantasma mas cercano
         peor."""
 
         listaComida = newFood.asList()
+
+        if listaComida:
+            comidaCerca = -3*min([manhattanDistance(newPos, comida) for comida in listaComida]) #No reducimos el valor de la comida ya que tiene más peso, se lo aumentamos
+        else:
+            comidaCerca = 0 #Si no hay comida hacemos que el único valor que se tenga en cuenta sea el de los fantasmas
 
         #Buscamos el fantasma más cercano
         fantasCerca = -min([manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates])
@@ -89,14 +94,9 @@ class ReflexAgent(Agent):
         else: 
             fantasCerca= float('-inf') #Escogemos este valor si no hay fantasmas para que el no haber fantasmas no interfiera en el resultado
 
-        if listaComida:
-            comidaCerca = -3*min([manhattanDistance(newPos, comida) for comida in listaComida]) #No reducimos el valor de la comida ya que tiene más peso, se lo aumentamos
-        else:
-            comidaCerca = 0 #Si no hay comida hacemos que el único valor que se tenga en cuenta sea el de los fantasmas
-
-        """Definimos el peso como la comida restante; le ifnluyen los valores calculados.
+        """Definimos el peso como la comida restante; le influyen los valores calculados.
         El peso se multiplica por un número alto para que los valores calculados no influyan tanto el valor final"""
-        valorTotal = comidaCerca + fantasCerca - (100*len(listaComida))
+        valorTotal = comidaCerca + fantasCerca - (50*len(listaComida))
         #print(valorTotal)
         return valorTotal
 
@@ -354,7 +354,47 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+    newGhostPos = currentGameState.getGhostPositions()
+    listaCapsulas = currentGameState.getCapsules()
+    "*** YOUR CODE HERE ***"
+    """Para la evaluación, nos basaremos en las distancias a la comida y a los fantasmas.
+    Cuanto más cerca esté la comida, mejor puntuación, y cuanto más cerca esté el fantasma más cercano
+    peor."""
+
+    listaComida = newFood.asList()
+
+    if listaComida:
+        comidaCerca = -4*min([manhattanDistance(newPos, comida) for comida in listaComida]) #No reducimos el valor de la comida ya que tiene más peso, se lo aumentamos
+    else:
+        comidaCerca = 0 #Si no hay comida hacemos que el único valor que se tenga en cuenta sea el de los fantasmas
+
+    if listaCapsulas:
+        capsulasCerca = -2*min([manhattanDistance(newPos, capsula) for capsula in listaCapsulas]) #No reducimos el valor de la comida ya que tiene más peso, se lo aumentamos
+    else:
+        capsulasCerca = 0 #Si no hay comida hacemos que el único valor que se tenga en cuenta sea el de los fantasmas
+
+    #Buscamos el fantasma más cercano
+    fantasCerca = -min([manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates])
+
+    #Trataremos las distancias en negativo -> Se buscan las mínimas pero mayor es mejor
+    if fantasCerca and fantasCerca < 3:
+        fantasCerca = 30/fantasCerca #Reducimos el valor de esta distancia ya que tener comida más cerca tiene más peso
+    else: 
+        fantasCerca = float('-inf') #Escogemos este valor si no hay fantasmas para que el no haber fantasmas no interfiera en el resultado
+
+    if newScaredTimes[0] > 0:
+        fantasCerca = -4*fantasCerca #Si los fantasmas se pueden comer, pasan a tener un peso positivo (alto) a la hora de evaluar.
+
+    """Definimos el peso como la comida restante; le influyen los valores calculados.
+    El peso se multiplica por un número alto para que los valores calculados no influyan tanto el valor final"""
+    valorTotal = capsulasCerca + comidaCerca + fantasCerca - (60*len(listaComida))
+    #print(valorTotal)
+    return valorTotal
+    #util.raiseNotDefined()
 
 # Abbreviation
 better = betterEvaluationFunction
