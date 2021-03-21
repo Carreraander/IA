@@ -226,13 +226,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         def max_value(gameState,depth,a,b):
             #print(depth,gameState.getNumAgents(),self.depth*gameState.getNumAgents())
-            """
-            Si estamos en un estado final, 
-                devolvemos la funcion de evaluacion en ese estado.
-            Si no,
-                Sacamos el maximo de entre sus sucesores, llamando a la funcion min 
-                (ya que es sucesor sera un min)
-            """
             v = float("-inf"), None
 
             if depth == self.depth*gameState.getNumAgents() or gameState.isWin() or gameState.isLose():
@@ -251,13 +244,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             return v
 
         def min_value(gameState,depth,a,b):
-            """
-            Si estamos en un estado final, 
-                devolvemos la funcion de evaluacion en ese estado.
-            Si no,
-                Sacamos el minimo de entre sus sucesores, llamando a la funcion max o min 
-                dependiendo del nivel en el que nos encontremos
-            """
             v = float("inf"), None
             nivel_agente = depth%gameState.getNumAgents()
 
@@ -297,13 +283,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         #util.raiseNotDefined()
         def max_value(gameState,depth):
             #print(depth,gameState.getNumAgents(),self.depth*gameState.getNumAgents())
-            """
-            Si estamos en un estado final, 
-                devolvemos la funcion de evaluacion en ese estado.
-            Si no,
-                Sacamos el maximo de entre sus sucesores, llamando a la funcion min 
-                (ya que es sucesor sera un min)
-            """
             v = float("-inf"), None
 
             if depth == self.depth*gameState.getNumAgents() or gameState.isWin() or gameState.isLose():
@@ -318,13 +297,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             return v
 
         def exp_value(gameState,depth):
-            """
-            Si estamos en un estado final, 
-                devolvemos la funcion de evaluacion en ese estado.
-            Si no,
-                Sacamos el minimo de entre sus sucesores, llamando a la funcion max o min 
-                dependiendo del nivel en el que nos encontremos
-            """
             v = 0, None
             nivel_agente = depth%gameState.getNumAgents()
 
