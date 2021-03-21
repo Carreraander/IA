@@ -294,7 +294,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
         def max_value(gameState,depth):
             #print(depth,gameState.getNumAgents(),self.depth*gameState.getNumAgents())
             """
@@ -327,7 +327,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             """
             v = 0, None
             nivel_agente = depth%gameState.getNumAgents()
-            probabilidad = 0
 
             if depth == self.depth*gameState.getNumAgents() or gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState),None
@@ -340,7 +339,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 else:
                     valor = exp_value(sucesor,depth + 1)
 
-                v = v[0] + valor*probabilidad,accion
+                v = v[0] + valor[0]/len(gameState.getLegalActions(nivel_agente)),accion
 
             return v
 
