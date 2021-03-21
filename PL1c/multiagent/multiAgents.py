@@ -179,7 +179,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 sucesor = gameState.generateSuccessor(0,accion)
                 minvalue = min_value(sucesor,depth +1)
 
-                if (v[0] < minvalue[0]):
+                if v[0] < minvalue[0]:
                     v  = minvalue[0],accion
             return v
 
@@ -204,7 +204,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     valor = max_value(sucesor,depth + 1)
                 else:
                     valor = min_value(sucesor,depth + 1)
-                if (v[0] > valor[0]):
+                if v[0] > valor[0]:
                     v  = valor[0],accion
 
             return v
@@ -242,7 +242,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 sucesor = gameState.generateSuccessor(0,accion)
                 minvalue = min_value(sucesor,depth +1,a,b)
 
-                if (v[0] < minvalue[0]):
+                if v[0] < minvalue[0]:
                     v  = minvalue[0],accion
                 if v[0] > b:
                     return v
@@ -313,7 +313,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 sucesor = gameState.generateSuccessor(0,accion)
                 minvalue = exp_value(sucesor,depth +1)
 
-                if (v[0] < minvalue[0]):
+                if v[0] < minvalue[0]:
                     v  = minvalue[0],accion
             return v
 
