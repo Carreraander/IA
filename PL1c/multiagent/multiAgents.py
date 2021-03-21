@@ -222,7 +222,64 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
+
+        def max_value(gameState,depth,a,b):
+            #print(depth,gameState.getNumAgents(),self.depth*gameState.getNumAgents())
+            """
+            Si estamos en un estado final, 
+                devolvemos la funcion de evaluacion en ese estado.
+            Si no,
+                Sacamos el maximo de entre sus sucesores, llamando a la funcion min 
+                (ya que es sucesor sera un min)
+            """
+            v = float("-inf"), None
+
+            if depth == self.depth*gameState.getNumAgents() or gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState),None
+            
+            for accion in gameState.getLegalActions(0):
+                sucesor = gameState.generateSuccessor(0,accion)
+                minvalue = min_value(sucesor,depth +1,a,b)
+
+                if (v[0] < minvalue[0]):
+                    v  = minvalue[0],accion
+                if v[0] > b:
+                    return v
+                if v[0] > a:
+                    a = v[0]
+            return v
+
+        def min_value(gameState,depth,a,b):
+            """
+            Si estamos en un estado final, 
+                devolvemos la funcion de evaluacion en ese estado.
+            Si no,
+                Sacamos el minimo de entre sus sucesores, llamando a la funcion max o min 
+                dependiendo del nivel en el que nos encontremos
+            """
+            v = float("inf"), None
+            nivel_agente = depth%gameState.getNumAgents()
+
+            if depth == self.depth*gameState.getNumAgents() or gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState),None
+
+            for accion in gameState.getLegalActions(nivel_agente):
+                sucesor = gameState.generateSuccessor(nivel_agente,accion)
+
+                if nivel_agente == gameState.getNumAgents() -1:
+                    valor = max_value(sucesor,depth + 1,a,b)
+                else:
+                    valor = min_value(sucesor,depth + 1,a,b)
+                if v[0] > valor[0]:
+                    v  = valor[0],accion
+                if v[0] < b:
+                    b = v[0]
+                if v[0] < a:
+                    return v
+            return v
+
+        return max_value(gameState,0,-float("inf"),float("inf"))[1]
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -238,6 +295,57 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
+        def max_value(gameState,depth):
+            #print(depth,gameState.getNumAgents(),self.depth*gameState.getNumAgents())
+            """
+            Si estamos en un estado final, 
+                devolvemos la funcion de evaluacion en ese estado.
+            Si no,
+                Sacamos el maximo de entre sus sucesores, llamando a la funcion min 
+                (ya que es sucesor sera un min)
+            """
+            v = float("-inf"), None
+
+            if depth == self.depth*gameState.getNumAgents() or gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState),None
+            
+            for accion in gameState.getLegalActions(0):
+                sucesor = gameState.generateSuccessor(0,accion)
+                minvalue = exp_value(sucesor,depth +1)
+
+                if (v[0] < minvalue[0]):
+                    v  = minvalue[0],accion
+            return v
+
+        def exp_value(gameState,depth):
+            """
+            Si estamos en un estado final, 
+                devolvemos la funcion de evaluacion en ese estado.
+            Si no,
+                Sacamos el minimo de entre sus sucesores, llamando a la funcion max o min 
+                dependiendo del nivel en el que nos encontremos
+            """
+            v = 0, None
+            nivel_agente = depth%gameState.getNumAgents()
+            probabilidad = 0
+
+            if depth == self.depth*gameState.getNumAgents() or gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState),None
+
+            for accion in gameState.getLegalActions(nivel_agente):
+                sucesor = gameState.generateSuccessor(nivel_agente,accion)
+
+                if nivel_agente == gameState.getNumAgents() -1:
+                    valor = max_value(sucesor,depth + 1)
+                else:
+                    valor = exp_value(sucesor,depth + 1)
+
+                v = v[0] + valor*probabilidad,accion
+
+            return v
+
+
+        return max_value(gameState,0)[1]
 
 def betterEvaluationFunction(currentGameState):
     """
