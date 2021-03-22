@@ -51,9 +51,6 @@ class PerceptronClassifier:
         # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
         # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
 
-        print(len(trainingData))
-        print(len(trainingLabels))
-
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
             for i in range(len(trainingData)):
@@ -66,9 +63,7 @@ class PerceptronClassifier:
 
 				#Actualizamos pesos (si fuera necesario)
                 if not labelMax == trainingLabels[i]:
-                    print("entra")
                     self.weights[trainingLabels[i]].__radd__(trainingData[i])
-                    print(self.weights)
 
                 #util.raiseNotDefined()
 
