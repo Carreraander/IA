@@ -66,7 +66,7 @@ class PerceptronClassifier:
                     self.weights[trainingLabels[i]].__radd__(trainingData[i])
 
                 #util.raiseNotDefined()
-
+                self.weights[labelMax]._sub_(trainingData[i])
     def classify(self, data ):
         """
         Classifies each datum as the label that most closely matches the prototype vector

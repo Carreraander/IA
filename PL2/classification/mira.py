@@ -61,6 +61,27 @@ class MiraClassifier:
         representing a vector of values.
         """
         "*** YOUR CODE HERE ***"
+        """
+        elegir una actualización que arregle la
+        errónea clasificación del ejemplo actual de
+        entrenamiento minimizando el cambio sobre W.
+            min(1/2*sum(w-wy)^2)
+            𝑤𝑦∗⋅𝑓𝑥≥𝑤𝑦⋅𝑓𝑥+𝟏
+            𝜏∗=𝑚𝑖𝑛(𝑤′𝑦−𝑤′𝑦∗⋅𝑓+12𝑓⋅𝑓,𝐶)
+        """
+        """
+        Variables:
+            Cgrid[]: Grid de las constantes C.
+            max_iterations: Numero maximo de iteraciones para no sobreajustar.
+            weights[]: Pesos para cada etiqueta.
+            tau: Variable para no realizar actualiaciones demasiado grandes.
+            trainingData, trainingLabels, validationLabels, validationData: Etiquetas y datos de train/test.
+            accuracy: Tasa de acierto(?)
+            prediccion: utilizar la funcion classify()
+            ...
+            
+        """
+        
         util.raiseNotDefined()
 
     def classify(self, data ):
