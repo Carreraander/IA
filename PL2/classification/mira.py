@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # mira.py
 # -------
 # Licensing Information:  You are free to use or extend these projects for
@@ -15,6 +16,8 @@
 # Mira implementation
 import util
 PRINT = True
+
+
 
 class MiraClassifier:
     """
@@ -62,8 +65,8 @@ class MiraClassifier:
         """
         "*** YOUR CODE HERE ***"
         """
-        elegir una actualización que arregle la
-        errónea clasificación del ejemplo actual de
+        elegir una actualizacion que arregle la
+        erronea clasificación del ejemplo actual de
         entrenamiento minimizando el cambio sobre W.
             min(1/2*sum(w-wy)^2)
             𝑤𝑦∗⋅𝑓𝑥≥𝑤𝑦⋅𝑓𝑥+𝟏

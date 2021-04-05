@@ -11,7 +11,6 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-
 # Perceptron implementation
 import util
 PRINT = True
@@ -58,15 +57,15 @@ class PerceptronClassifier:
                 #Calculamos los scores para este caso de training 
                 scores = util.Counter() #Lista temporal con los scores para cada clase del caso que se esta mirando
                 for j in range(len(self.weights)):
-					scores[j] = trainingData[i].__mul__(self.weights[j]) 
+					scores[j] = trainingData[i]*(self.weights[j]) 
                 labelMax = max(scores, key=scores.get)	
 
 				#Actualizamos pesos (si fuera necesario)
                 if not labelMax == trainingLabels[i]:
                     self.weights[trainingLabels[i]].__radd__(trainingData[i])
+                    self.weights[labelMax].__sub__(trainingData[i])
 
                 #util.raiseNotDefined()
-                self.weights[labelMax]._sub_(trainingData[i])
     def classify(self, data ):
         """
         Classifies each datum as the label that most closely matches the prototype vector
@@ -90,6 +89,7 @@ class PerceptronClassifier:
         featuresWeights = []
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #Ordenamos las keys por el valor de su feature de menor a mayor. Activamos el reverse ya que necesitamos de mayor a menor para que se vea bien el resultado.
+        featuresWeights = sorted(self.weights[label].keys(), key=lambda feature: self.weights[label][feature], reverse=True)[:100]
 
         return featuresWeights
