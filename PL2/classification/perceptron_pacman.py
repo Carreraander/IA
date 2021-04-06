@@ -54,7 +54,7 @@ class PerceptronClassifierPacman(PerceptronClassifier):
                 data,movimientos= trainingData[i]
                 for j in movimientos:
                     scores[j] = data[j]*(self.weights) 
-                labelMax = scores.argMax()	
+                labelMax = max(scores, key=scores.get)	
 
 				#Actualizamos pesos (si fuera necesario)
                 if  labelMax != trainingLabels[i]:
