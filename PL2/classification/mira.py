@@ -70,22 +70,47 @@ class MiraClassifier:
         entrenamiento minimizando el cambio sobre W.
             min(1/2*sum(w-wy)^2)
             𝑤𝑦∗⋅𝑓𝑥≥𝑤𝑦⋅𝑓𝑥+𝟏
-            𝜏∗=𝑚𝑖𝑛(𝑤′𝑦−𝑤′𝑦∗⋅𝑓+12𝑓⋅𝑓,𝐶)
+            𝜏∗=𝑚𝑖𝑛(𝑤′𝑦−𝑤′𝑦∗⋅𝑓+1)/(2𝑓⋅𝑓),𝐶)
         """
         """
         Variables:
             Cgrid[]: Grid de las constantes C.
             max_iterations: Numero maximo de iteraciones para no sobreajustar.
-            weights[]: Pesos para cada etiqueta.
+            weights[]: Pesos para cada label.
             tau: Variable para no realizar actualiaciones demasiado grandes.
-            trainingData, trainingLabels, validationLabels, validationData: Etiquetas y datos de train/test.
+            trainingData, trainingLabels, validationLabels, validationData: labels y datos de train/test.
             accuracy: Tasa de acierto(?)
             prediccion: utilizar la funcion classify()
             ...
             
         """
-        
-        util.raiseNotDefined()
+
+        for c in Cgrid:
+            for iteration in range(self.max_iterations):
+                for i in range(len(trainingData)):
+                    #No me vale un 0 como labelpre obviamente
+                    labelpre = -1
+                    toplabel = None
+                    for label in self.legalLabels:
+                        prediccion = self.weights[label] * trainingData[i]
+                        if labelpre < prediccion:
+                            #Guardamos los resultados con mayor probabilidad de acierto
+                            labelpre = prediccion
+                            toplabel = label
+
+                    if toplabel != trainingLabels[i]: #No esta bien predicho
+                        #𝜏=𝑚𝑖𝑛(𝑤′𝑦−𝑤′𝑦∗⋅𝑓+1)/(2𝑓⋅𝑓),𝐶)
+                        tau = min(c,(((self.weights[toplabel] - self.weights[trainingLabels[i]]) * trainingData[i] + 1.0) / ( 2 * (trainingData[i] * trainingData[i]))))
+                        
+                        #Unica manera de poder multiplicar f por tau (Ya que f esta definido como un counter)
+                        tau2 = trainingData[i].copy()
+                        tau2.divideAll(1.0/tau)
+                        #Ajustes
+                        self.weights[toplabel] -= tau2
+                        self.weights[trainingLabels[i]] += tau2
+
+
+        #util.raiseNotDefined()
 
     def classify(self, data ):
         """
