@@ -47,10 +47,10 @@
 		)
 	)
 	(if (= ?jugador 1) then
-		(assert (turno_maquina))
+		(assert (turno 1)) ;Maquina
 	else
 		(if (= ?jugador 2) then
-			(assert (turno_persona))
+			(assert (turno 2)) ;Persona
 		)
 	)
 	(assert (empezar_juego))
@@ -59,9 +59,11 @@
 (defrule movimiento_maquina
 	(declare (salience 10))
 	(empezar_juego)
-	?turno <- (turno_maquina)
+	(jugadorInicial ?jugIni)
+	?turnoMaq <- (turno ?turn)
 	(tamano ?tam)
 	?tabl <- (tablero (fichas $?f))
+	(test (= ?turn 1))
 =>
 	(printout t "Turno de la maquinota" crlf)
 	(printout t "Numero de fichas: " (div ?tam 2) crlf)
@@ -69,10 +71,21 @@
 	(bind ?num_ficha (read))
 	; Jugador 2 no puede mover en caso de tablero 4 ni ficha 1 ni ficha 2 
 	; No puede seleccionar ninguna ficha menor que el tamaño del tablero entre dos ni mayor que el tamaño ni menor que 0
-	(while (or (or (> ?num_ficha (div ?tam 2)) (> ?num_ficha ?tam)) (< ?num_ficha 0))
-		(printout t "No puedes seleccionar esa ficha")
-		(bind ?num_ficha (read))
+	(if (= ?jugIni 1) then
+		(while (or (or (> ?num_ficha (div ?tam 2)) (> ?num_ficha ?tam)) (< ?num_ficha 0))
+			(printout t "No puedes seleccionar esa ficha" crlf)
+			(printout t "Ficha a mover: ")
+			(bind ?num_ficha (read))
+		)
+	else
+		(while (or (or (< ?num_ficha (div ?tam 2)) (> ?num_ficha ?tam)) (< ?num_ficha 0))
+			(printout t "No puedes seleccionar esa ficha" crlf)
+			(printout t "Ficha a mover: ")
+			(bind ?num_ficha (read))
+		)
 	)
+
+
 	(bind ?ficha_tablero (nth$ (- (* ?num_ficha 2) 1) $?f))
 	(bind ?pos_ficha (nth$ (* ?num_ficha 2) $?f))
 	(printout t "Posicion de la ficha: " ?pos_ficha crlf)
@@ -94,50 +107,59 @@
 	
 	(bind ?nueva_pos_ficha (+ ?fila ?columna))
 
-	;No comprendo este if
-
-	;(if (< ?pos_ficha (* (div ?tam 2) 10)) then
-	;else
-	;	(if (or (= ?nueva_pos_ficha (- ?pos_ficha 21)) (= ?nueva_pos_ficha (- ?pos_ficha 19))) then
-	;		(printout t "Ficha movida a: " ?nueva_pos_ficha crlf)
-	;		(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
-	;		(retract ?turno)
-	;		(assert (turno_maquina))
-	;	else
-	;		(printout t "Movimiento inválido" crlf)
-	;		(modify ?tabl (fichas $?f))
-	;	)
-	;)
-
 	;Si:
-		;	La posicion nueva es igual a la posicion anterior + 9 o + 11
-	(if (or (= ?nueva_pos_ficha (+ ?pos_ficha 9)) (= ?nueva_pos_ficha (+ ?pos_ficha 11))) then
-		(printout t "Ficha movida a: " ?nueva_pos_ficha crlf)
-		(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
-		(retract ?turno)
-		(assert (turno_maquina))
+	;La posicion nueva es igual a la posicion anterior + 9 o + 11 (si son blancas) -9 o -11 (si son negras)
+	(if (= ?jugIni 1) then
+		(if (or (= ?nueva_pos_ficha (+ ?pos_ficha 9)) (= ?nueva_pos_ficha (+ ?pos_ficha 11))) then
+			(printout t "Ficha movida a: " ?nueva_pos_ficha crlf)
+			(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
+			(retract ?turnoMaq)
+			(assert (turno 2))
+		else
+			(printout t "Movimiento inválido" crlf)
+			(modify ?tabl (fichas $?f))
+		)
 	else
-		(printout t "Movimiento inválido" crlf)
-		(modify ?tabl (fichas $?f))
+		(if (or (= ?nueva_pos_ficha (- ?pos_ficha 9)) (= ?nueva_pos_ficha (- ?pos_ficha 11))) then
+			(printout t "Ficha movida a: " ?nueva_pos_ficha crlf)
+			(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
+			(retract ?turnoMaq)
+			(assert (turno 2))
+		else
+			(printout t "Movimiento inválido" crlf)
+			(modify ?tabl (fichas $?f))
+		)
 	)
-	
 	
 )
 
 (defrule movimiento_persona
 	(empezar_juego)
-	?turno <- (turno_persona)
+	(jugadorInicial ?jugIni)
+	?turnoPer <- (turno ?turn)
 	(tamano ?tam)
 	?tabl <- (tablero (fichas $?f))
+	(test (= ?turn 2))
 =>
 	(printout t "Turno de la persona" crlf)
 	(printout t "Numero de fichas: " (div ?tam 2) crlf)
 	(printout t "Ficha a mover: ")
 	(bind ?num_ficha (read))
-	(while (or (or (< ?num_ficha (div ?tam 2)) (> ?num_ficha ?tam)) (< ?num_ficha 0))
-		(printout t "No puedes seleccionar esa ficha")
-		(bind ?num_ficha (read))
+
+	(if (= ?jugIni 2) then
+		(while (or (or (> ?num_ficha (div ?tam 2)) (> ?num_ficha ?tam)) (< ?num_ficha 0))
+			(printout t "No puedes seleccionar esa ficha" crlf)
+			(printout t "Ficha a mover: ")
+			(bind ?num_ficha (read))
+		)
+	else
+		(while (or (or (< ?num_ficha (div ?tam 2)) (> ?num_ficha ?tam)) (< ?num_ficha 0))
+			(printout t "No puedes seleccionar esa ficha" crlf)
+			(printout t "Ficha a mover: ")
+			(bind ?num_ficha (read))
+		)
 	)
+
 	(bind ?ficha_tablero (nth$ (- (* ?num_ficha 2) 1) $?f))
 	(bind ?pos_ficha (nth$ (* ?num_ficha 2) $?f))
 	(printout t "Posicion de la ficha: " ?pos_ficha crlf)
@@ -157,23 +179,24 @@
 	)
 	(bind ?nueva_pos_ficha (+ ?fila ?columna))
 	
-	(if (< ?pos_ficha (* (div ?tam 2) 10)) then
-
-		(if (or (= ?nueva_pos_ficha (- ?pos_ficha 21)) (= ?nueva_pos_ficha (- ?pos_ficha 19))) then
+	;Si:
+	;La posicion nueva es igual a la posicion anterior + 9 o + 11 (si son blancas) -9 o -11 (si son negras)
+	(if (= ?jugIni 2) then
+		(if (or (= ?nueva_pos_ficha (+ ?pos_ficha 9)) (= ?nueva_pos_ficha (+ ?pos_ficha 11))) then
 			(printout t "Ficha movida a: " ?nueva_pos_ficha crlf)
 			(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
-			(retract ?turno)
-			(assert (turno_maquina))
+			(retract ?turnoPer)
+			(assert (turno 1))
 		else
 			(printout t "Movimiento inválido" crlf)
 			(modify ?tabl (fichas $?f))
 		)
 	else
-		(if (or (= ?nueva_pos_ficha (- ?pos_ficha 21)) (= ?nueva_pos_ficha (- ?pos_ficha 19))) then
+		(if (or (= ?nueva_pos_ficha (- ?pos_ficha 9)) (= ?nueva_pos_ficha (- ?pos_ficha 11))) then
 			(printout t "Ficha movida a: " ?nueva_pos_ficha crlf)
 			(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
-			(retract ?turno)
-			(assert (turno_maquina))
+			(retract ?turnoPer)
+			(assert (turno 1))
 		else
 			(printout t "Movimiento inválido" crlf)
 			(modify ?tabl (fichas $?f))
@@ -189,26 +212,35 @@
 	;  - Modify tablero quitando ficha comida
 	(empezar_juego)
 	(tamano ?tam)
-	?turno <- (turno_maquina)
+	(jugadorInicial ?jugIni)
+	(turno ?turn)
 	?tabl <- (tablero (fichas $?f))
 =>
-
-	;(if (= ?turno turno_maquina) then
+	;Para las blancas
+	(if (or (and (= ?jugIni 1)(= ?turn 1)) (and (= ?jugIni 2)(= ?turn 2))) then
 		(loop-for-count (?i 1 (div ?tam 2))
-			(bind ?ficha_tablero1 (nth$ (- (* ?i 2) 1) $?f))
 			(bind ?pos_ficha1 (nth$ (* ?i 2) $?f))
 			(loop-for-count (?j (div ?tam 2) ?tam)
-				(bind ?ficha_tablero2 (nth$ (- (* ?j 2) 1) $?f))
 				(bind ?pos_ficha2 (nth$ (* ?j 2) $?f))
-				(if (or (= ?pos_ficha1 (+ ?pos_ficha2 9)) (= ?pos_ficha1 (+ ?pos_ficha2 11))) then
-					; guardar en una variable que ficha se puede comer desde que otra ficha
-					(printout t "Ficha:" ?ficha_tablero1 "se puede comer a:" ?ficha_tablero2 crlf)
-					(retract ?turno)
-					(assert (turno_maquina))
+				(if (or (= ?pos_ficha2 (+ ?pos_ficha1 9)) (= ?pos_ficha2 (+ ?pos_ficha1 11))) then
+					;TODO: Guardado de fichas a comer como queramos hacerlo
 				)
 			)
 		)
-	;)
+	)
+
+	;Para las negras
+	(if (or (and (= ?jugIni 2)(= ?turn 1)) (and (= ?jugIni 1)(= ?turn 2))) then
+		(loop-for-count (?i (div ?tam 2) ?tam)
+			(bind ?pos_ficha1 (nth$ (* ?i 2) $?f))
+			(loop-for-count (?j 1 (div ?tam 2))
+				(bind ?pos_ficha2 (nth$ (* ?j 2) $?f))
+				(if (or (= ?pos_ficha2 (- ?pos_ficha1 9)) (= ?pos_ficha2 (- ?pos_ficha1 11))) then
+					;TODO: Guardado de fichas a comer como queramos hacerlo
+				)
+			)
+		)
+	)
 )
 
 
