@@ -204,6 +204,23 @@
 	)
 
 )
+
+(deffunction efectuar_el_zampe($?posibles_comidas $?f)
+	(printout "Estas son las fichas que pueden comer:" crlf)
+	(if (> (length$ ?posibles_comidas) 0))
+		(printout "Fichas que pueden comer:")
+		(bind ?i 1)
+		(while (< ?i (length$ ?posibles_comidas))
+			(printout "Ficha " (nth$ (nth$ ?i ?posibles_comidas) ?f) " se puede comer a la ficha " (nth$ (nth$ (+ ?i 2) ?posibles_comidas) ?f) " en la posicion " (nth$ (+ (nth$ (+ ?i 2) ?posibles_comidas) 1)  ?f) crlf)
+		)
+		(printout "Que ficha quieres que coma: ")
+		(bind ?ficha (read))
+	)
+)
+
+
+
+
 ;TODO: Problemas con que no se repite indefinidamente comer_ficha
 (defrule comer_ficha
 	(declare (salience 100))
@@ -218,16 +235,38 @@
 =>
 	;Para las blancas
 	(if (or (and (= ?jugIni 1)(= ?turn 1)) (and (= ?jugIni 2)(= ?turn 2))) then
+		(bind ?puede_comer 1)
+		(bind ?ya_ha_comido 0)
+		(bind $?fichas_que_comen (create$ ))
 		(loop-for-count (?i 1 (div ?tam 2))
 			(bind ?pos_ficha1 (nth$ (* ?i 2) $?f))
 			(loop-for-count (?j (div ?tam 2) ?tam)
 				(bind ?pos_ficha2 (nth$ (* ?j 2) $?f))
 				(if (or (= ?pos_ficha2 (+ ?pos_ficha1 9)) (= ?pos_ficha2 (+ ?pos_ficha1 11))) then
-					;TODO: Guardado de fichas a comer como queramos hacerlo
+					;Restar pos_ficha1 y pos_ficha2 para saber en qué diagonal ha ido
+					(bind ?diagonal (+ ?pos_ficha2 (- ?pos_ficha2 ?pos_ficha1)))
+					;Este if mira si la siguiente diagonal está fuera del tablero, por lo cual no se podría comer ficha
+					(if (or (!= (div ?diagonal 10) 0) (< (div diag 10) ?tam) (!= (mod diag 10) 0) (< (mod diag 10) ?tam )) then 
+						;Mirar si se puede comer; si en la siguiente en la diagonal de la ficha a comer está vacía
+						(loop-for-count (?k 1 ?tam)
+							(bind ?pos_ficha_en_diag (nth$ (* ?k 2) $?f))
+							(if (= ?diagonal ?pos_ficha_en_diag) then
+								;Aquí NO puede comer
+								(bind ?puede_comer 0)
+							)
+						)
+
+					)
+				)
+				(if (= ?puede_comer 1) then
+					;Efectuar el zampe
+					(insert$ ?fichas_que_comen 1 (create$ ?i ?j ?diagonal))					
 				)
 			)
 		)
+		(efectuar_el_zampe(?fichas_que_comen ?f))
 	)
+
 
 	;Para las negras
 	(if (or (and (= ?jugIni 2)(= ?turn 1)) (and (= ?jugIni 1)(= ?turn 2))) then
