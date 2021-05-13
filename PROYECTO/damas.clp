@@ -4,6 +4,8 @@
 ;
 ;	- Cuando llegue al final eliminar dicha ficha y sumar un punto.
 ;
+;       - Hacer que se llegue a victoria cuando 2 fichas llegan al final o todas las fichas son comidas
+;
 ;	- Hacer que las fichas comidas y/o que estén en posición de victoria (ficha en posición  0) no se puedan utilizar.
 
 
@@ -55,7 +57,8 @@
 			(assert (tamano 12))
 		)
 		(case 8 then
-			(modify ?tablero (fichas o 12 o 14 o 16 o 18 o 21 o 23 o 25 o 27 o 32 o 34 o 36 o 38 x 61 x 63 x 65 x 67 x 72 x 74 x 76 x 78 x 81 x 83 x 85 x 87))
+			;(modify ?tablero (fichas o 12 o 14 o 16 o 18 o 21 o 23 o 25 o 27 o 32 o 34 o 36 o 38 x 61 x 63 x 65 x 67 x 72 x 74 x 76 x 78 x 81 x 83 x 85 x 87))
+                        (modify ?tablero (fichas o 73 o 75 o 00 o 00 o 00 o 00 o 00 o  o 00 o 00 o 00 o 00 x 00 x 63 x 00 x 00 x 00 x 00 x 00 x 0 x 00 x 00 x 00 x 00))
 			(assert (tamano 24))
 		)
 	)
@@ -66,6 +69,8 @@
 			(assert (turno 2)) ;Persona
 		)
 	)
+        (assert (puntuacionPersona 0))
+        (assert (puntuacionMaquina 0))
 	(assert (empezar_juego))
 )
 
@@ -77,7 +82,8 @@
 	(tamano ?tam)
 	?tabl <- (tablero (fichas $?f))
 	(test (= ?turn 1))
-	?contr <- (control ?val_control)
+	?contr <- (control ?val_control) ;Control de turnos enc caso de que se pueda hacer un movimineto de comida doble
+        ?punt <- (puntuacionMaquina ?puntos)
 =>
 	(retract ?contr)
 	(assert (control 0))
@@ -125,7 +131,7 @@
 	(bind ?puede_mover 1)
 	;Si:
 	;La posicion nueva es igual a la posicion anterior + 9 o + 11 (si son blancas) -9 o -11 (si son negras)
-	(if (= ?jugIni 1) then
+	(if (= ?jugIni 1) then ;Blancas
 		(if (or (= ?nueva_pos_ficha (+ ?pos_ficha 9)) (= ?nueva_pos_ficha (+ ?pos_ficha 11))) then
 			(loop-for-count (?i 1 ?tam)
 				(bind ?pos_ficha2 (nth$ (* ?i 2) $?f))
@@ -138,6 +144,13 @@
 				(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
 				(retract ?turnoMaq)
 				(assert (turno 2))
+
+                                ;Miramos si la posición es de victoria, es decir, que la fila sea 8. Si lo es añadimos 
+                                (if (= ?fila 80) then
+                                        (bind ?puntos (+ ?puntos 1))
+                                        (retract ?punt)
+                                        (assert (puntuacionMaquina ?puntos))
+                                )
 			else
 				(printout t "Movimiento inválido" crlf)
 				(modify ?tabl (fichas $?f))
@@ -146,7 +159,7 @@
 			(printout t "Movimiento inválido" crlf)
 			(modify ?tabl (fichas $?f))
 		)
-	else
+	else ;Negras
 		(if (or (= ?nueva_pos_ficha (- ?pos_ficha 9)) (= ?nueva_pos_ficha (- ?pos_ficha 11))) then
 			(loop-for-count (?i 1 ?tam)
 				(bind ?pos_ficha2 (nth$ (* ?i 2) $?f))
@@ -160,6 +173,14 @@
 				(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
 				(retract ?turnoMaq)
 				(assert (turno 2))
+
+                                ;Miramos si la posición es de victoria, es decir, que la fila sea 8. Si lo es añadimos 
+                                (if (= ?fila 10) then
+                                        (bind ?puntos (+ ?puntos 1))
+                                        (retract ?punt)
+                                        (assert (puntuacionMaquina ?puntos))
+                                )
+
 			else
 				(printout t "Movimiento inválido" crlf)
 				(modify ?tabl (fichas $?f))
@@ -180,7 +201,8 @@
 	(tamano ?tam)
 	?tabl <- (tablero (fichas $?f))
 	(test (= ?turn 2))
-	?contr <- (control ?val_control)
+	?contr <- (control ?val_control) ;Control de turnos enc caso de que se pueda hacer un movimineto de comida doble
+        ?punt <- (puntuacionPersona ?puntos)
 =>
 	(retract ?contr)
 	(assert (control 0))
@@ -188,6 +210,7 @@
 	(printout t "Numero de fichas: " (div ?tam 2) crlf)
 	(printout t "Ficha a mover: ")
 	(bind ?num_ficha (read))
+
 
 	(if (= ?jugIni 2) then
 		(while (or (or (> ?num_ficha (div ?tam 2)) (> ?num_ficha ?tam)) (< ?num_ficha 0))
@@ -222,7 +245,7 @@
 	)
 	(bind ?nueva_pos_ficha (+ ?fila ?columna))
 	(bind ?puede_mover 1)
-	;Si:
+
 	;La posicion nueva es igual a la posicion anterior + 9 o + 11 (si son blancas) -9 o -11 (si son negras)
 	(if (= ?jugIni 2) then
 		(if (or (= ?nueva_pos_ficha (+ ?pos_ficha 9)) (= ?nueva_pos_ficha (+ ?pos_ficha 11))) then
@@ -237,6 +260,14 @@
 				(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
 				(retract ?turnoPer)
 				(assert (turno 1))
+
+                                ;Miramos si la posición es de victoria, es decir, que la fila sea 8. Si lo es añadimos 
+                                (if (= ?fila 80) then
+                                        (bind ?puntos (+ ?puntos 1))
+                                        (retract ?punt)
+                                        (assert (puntuacionPersona ?puntos))
+                                )
+
 			else
 				(printout t "Movimiento inválido" crlf)
 				(modify ?tabl (fichas $?f))
@@ -258,6 +289,13 @@
 				(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
 				(retract ?turnoPer)
 				(assert (turno 1))
+
+                                ;Miramos si la posición es de victoria, es decir, que la fila sea 8. Si lo es añadimos 
+                                (if (= ?fila 10) then
+                                        (bind ?puntos (+ ?puntos 1))
+                                        (retract ?punt)
+                                        (assert (puntuacionPersona ?puntos))
+                                )
 			else 
 				(printout t "Movimiento inválido" crlf)
 				(modify ?tabl (fichas $?f))
@@ -267,6 +305,7 @@
 			(modify ?tabl (fichas $?f))
 		)
 	)
+
 	(assert (se_puede_comer))
 
 )
@@ -302,6 +341,7 @@
 		(return ?ficha)
 	)
 
+        ;Estos solo se devuelven cuando ya no hay posibles comidas, para el control de turnos.
 	(if (= ?control 1) then
 		(return -1)
 	else
@@ -323,9 +363,11 @@
 	?tabl <- (tablero (fichas $?f))
 	?comer <- (se_puede_comer)
 	?contr <- (control ?val_control)
+        ?pPer <- (puntuacionPersona ?puntosPersona)
+        ?pMaq <- (puntuacionMaquina ?puntosMaquina)
 
 =>
-	; Para las blancas
+	
 	; Fichas que comen indica que ficha come a queotra ficha y a donde se va a mover como consecuencia
 	; En fichas_que_comen en caso de existir posicion 00 significa que no se come ninguna ficha
 
@@ -338,6 +380,8 @@
 							; si a donde se moveria en caso de comer no hay ninguna ficha negra mas:
 								; puede_comer true
 	(retract ?comer) ;Para que no buclee infinitamente para revisar si puede comer
+
+        ; Para las blancas
 	(if (or (and (= ?jugIni 1)(= ?turn 1)) (and (= ?jugIni 2)(= ?turn 2))) then
 		(bind ?puede_comer 1)
 		(bind ?ya_ha_comido 0)
@@ -382,6 +426,25 @@
 			(modify ?tabl (fichas ?f))
 			(retract ?contr)
 			(assert (control 1))
+
+                        ;CONTROL DE PUNTUACIÓN
+                        (if (and (= ?jugIni 1)(= ?turn 1)) then ;Vemos si es la maquina
+                                (if (>= ?pos_nueva_ficha 81) then ;Miramos si la posición es de victoria, es decir, que la fila sea 8. Si lo es añadimos un punto
+                                        (bind ?puntosMaquina (+ ?puntosMaquina 1))
+                                        (retract ?pMaq)
+                                        (assert (puntuacionMaquina ?puntosMaquina))
+                                )
+                        else
+                                (if (and (= ?jugIni 2)(= ?turn 2)) then ;Vemos si es la persona
+                                        (if (>= ?pos_nueva_ficha 81) then ;Miramos si la posición es de victoria, es decir, que la fila sea 8. Si lo es añadimos un punto
+                                                (bind ?puntosPersona (+ ?puntosPersona 1))
+                                                (retract ?pMaq)
+                                                (assert (puntuacionMaquina ?puntosPersona))
+                                        )
+                                )
+                        )
+
+                ;CONTROL DE TURNOS
 		else 
 			(if (= ?ficha -1) then
 				(if (and (= ?jugIni 1)(= ?turn 1)) then
@@ -394,13 +457,10 @@
 				)
 			)
 		)
-
-		
-
-		;(if ?ya_ha_comido 1) then
-		; TODO: Copiar y pegar basicamente el algoritmo de arriba
-		;)
 	)
+
+
+        ; Para las negras
 	(if (or (and (= ?jugIni 2)(= ?turn 1)) (and (= ?jugIni 1)(= ?turn 2))) then
 		(bind ?puede_comer 1)
 		(bind ?ya_ha_comido 0)
@@ -446,6 +506,23 @@
 			(modify ?tabl (fichas ?f))
 			(retract ?contr)
 			(assert (control 1))
+
+                        ;CONTROL DE PUNTUACIÓN
+                        (if (and (= ?jugIni 2)(= ?turn 1)) then ;Vemos si es la maquina
+                                (if (and (>= ?pos_nueva_ficha 11) (< ?pos_nueva_ficha 20)) then ;Miramos si la posición es de victoria, es decir, que la fila sea 1. Si lo es añadimos un punto
+                                        (bind ?puntosMaquina (+ ?puntosMaquina 1))
+                                        (retract ?pMaq)
+                                        (assert (puntuacionMaquina ?puntosMaquina))
+                                )
+                        else
+                                (if (and (= ?jugIni 2)(= ?turn 2)) then ;Vemos si es la persona
+                                        (if (and (>= ?pos_nueva_ficha 11) (< ?pos_nueva_ficha 20)) then ;Miramos si la posición es de victoria, es decir, que la fila sea 1. Si lo es añadimos un punto
+                                                (bind ?puntosPersona (+ ?puntosPersona 1))
+                                                (retract ?pMaq)
+                                                (assert (puntuacionMaquina ?puntosPersona))
+                                        )
+                                )
+                        )
 			
 		else
 			(if (= ?ficha -1) then
@@ -459,41 +536,25 @@
 				)
 			)
 		)
-	
-		;(if ?ya_ha_comido 1) then
-		; TODO: Copiar y pegar basicamente el algoritmo de arriba
-		;)
-	)
-
-	;TODO: Copiar el algoritmo de las blancas modificando unicamente ?i y ?j (creo)
-	;Para las negras
-	
+	)	
 )
 
+(defrule hay_victoria
+        ?pPers <- (puntuacionPersona ?puntosPersona)
+        ?pMaq <- (puntuacionMaquina ?puntosMaquina)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+=>
+        
+        ;Miramos si la persona ha llegado a 2 puntos, es decir, 2 fichas en el final
+        (if (= ?puntosPersona 2) then
+                (printout t "VICTORIA" crlf)
+                (printout t "Ha ganado el jugador" crlf)
+                (exit)
+        )
+        ;Miramos si la mmáquina ha llegado a 2 puntos, es decir, 2 fichas en el final
+        (if (= ?puntosMaquina 2) then
+                (printout t "VICTORIA" crlf)
+                (printout t "Ha ganado la maquinota" crlf)
+                (exit)
+        )
+)
