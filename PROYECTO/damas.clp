@@ -73,6 +73,53 @@
 	(assert (empezar_juego))
 )
 
+(deffunction puede_moverse(?pos_ficha ?nueva_pos_ficha ?f ?jugIni ?tam)
+	; @pos posicion de la ficha actual
+	; @nueva_pos posicion nueva de la ficha
+	; @f disposicion de las fichas del tablero
+	(bind ?fila (div ?nueva_pos_ficha 10))
+	(bind ?columna (mod ?nueva_pos_ficha 10))
+
+	(if (or (> ?fila ?tam) (< ?fila 1) (> ?columna ?tam) (< ?columna 1)) then
+		(return 0)
+	)
+	(if (= ?jugIni 1) then ;Blancas
+		(loop-for-count (?i 1 ?tam)
+			(bind ?pos_ficha2 (nth$ (* ?i 2) $?f))
+			(if (or (= ?pos_ficha2 ?nueva_pos_ficha) (= ?pos_ficha2 ?nueva_pos_ficha)) then
+				(return 0)
+			)
+		)
+	else ;Negras
+		(loop-for-count (?i 1 ?tam)
+			(bind ?pos_ficha2 (nth$ (* ?i 2) $?f))
+			(if (or (= ?pos_ficha2 ?nueva_pos_ficha) (= ?pos_ficha2 ?nueva_pos_ficha)) then
+				(return 0)
+			)
+		)
+	)
+	(return 1)
+)
+(deffunction heuristico (?pos_ficha_nueva ?f)
+    (bind ?heuristic 0)
+        (if (or(< ?pos_ficha_nueva 20)(< ?pos_ficha_nueva 80))then
+            (return 30)
+        else
+            (if (or(= (mod ?pos_ficha_nueva 10)0)(=(mod ?pos_ficha_nueva 10)8))then
+                (return 10)
+
+            else
+            (return 1)
+
+            )
+
+        )
+
+
+
+
+)
+
 (defrule movimiento_maquina
 	(declare (salience 10))
 	(empezar_juego)
@@ -87,108 +134,76 @@
 	(retract ?contr)
 	(assert (control 0))
 	(printout t "Turno de la maquinota" crlf)
-	(printout t "Numero de fichas: " (div ?tam 2) crlf)
-	(printout t "Ficha a mover: ")
-	(bind ?num_ficha (read))
+	(bind ?ficha_a_mover 0)
+	(bind ?mejormobimiento 0)
+	(bind ?mejor_heuristico 0)
+	; (printout t "Numero de fichas: " (div ?tam 2) crlf) Falso
 	; Jugador 2 no puede mover en caso de tablero 4 ni ficha 1 ni ficha 2 
 	; No puede seleccionar ninguna ficha menor que el tamaño del tablero entre dos ni mayor que el tamaño ni menor que 0
 	(if (= ?jugIni 1) then
-		(while (or (or (> ?num_ficha (div ?tam 2)) (> ?num_ficha ?tam)) (< ?num_ficha 0))
-			(printout t "No puedes seleccionar esa ficha" crlf)
-			(printout t "Ficha a mover: ")
-			(bind ?num_ficha (read))
+		(loop-for-count (?i 1 (div ?tam 2))
+			(bind ?pos_ficha (nth$ (* ?i 2) $?f))
+			(bind ?nueva_pos_ficha1 (+ ?pos_ficha 9))
+			(bind ?nueva_pos_ficha2 (+ ?pos_ficha 11))
+			(bind ?puede_moverse_maq1 (puede_moverse ?pos_ficha ?nueva_pos_ficha1 ?f ?jugIni ?tam))
+			(bind ?puede_moverse_maq2 (puede_moverse ?pos_ficha ?nueva_pos_ficha1 ?f ?jugIni ?tam))
+			(printout t ?puede_moverse_maq1  " "  ?puede_moverse_maq2 crlf)
+			(if (= ?puede_moverse_maq1 1)then
+				(bind ?heuristic1 (heuristico ?nueva_pos_ficha1 ?f))
+				(if (> ?heuristic1 ?mejor_heuristico) then
+					(bind ?mejor_heuristico ?heuristic1)
+
+					(bind ?mejormobimiento  ?nueva_pos_ficha1)
+					(bind ?ficha_a_mover (* ?i 2))
+					)
+			)
+			(if (= ?puede_moverse_maq2 1) then
+				(bind ?heuristic2 (heuristico ?nueva_pos_ficha2 ?f) )
+				(if (> ?heuristic2 ?mejor_heuristico)then
+					(bind ?mejor_heuristico ?heuristic2)
+
+					(bind ?mejormobimiento ?nueva_pos_ficha2)
+					(bind ?ficha_a_mover (* ?i 2))
+					)
+			)
+
 		)
 	else
-		(while (or (or (<= ?num_ficha (div ?tam 2)) (> ?num_ficha ?tam)) (< ?num_ficha 0))
-			(printout t "No puedes seleccionar esa ficha" crlf)
-			(printout t "Ficha a mover: ")
-			(bind ?num_ficha (read))
+		(loop-for-count (?i (+ (div ?tam 2) 1) ?tam)
+			(bind ?pos_ficha (nth$ (* ?i 2) $?f))
+			(bind ?nueva_pos_ficha1 (- ?pos_ficha 9))
+			(bind ?nueva_pos_ficha2 (- ?pos_ficha 11))
+			(bind ?puede_moverse_maq1 (puede_moverse ?pos_ficha ?nueva_pos_ficha1 ?f ?jugIni ?tam))
+			(bind ?puede_moverse_maq2 (puede_moverse ?pos_ficha ?nueva_pos_ficha1 ?f ?jugIni ?tam))
+			(printout t "La ficha "  ?pos_ficha  " "?puede_moverse_maq1  " " ?puede_moverse_maq2 crlf)
+			(if (= ?puede_moverse_maq1 1)then
+				(bind ?heuristic1 (heuristico ?nueva_pos_ficha1 ?f))
+				(if (> ?heuristic1 ?mejor_heuristico) then
+					(bind ?mejor_heuristico ?heuristic1)
+
+					(bind ?mejormobimiento  ?nueva_pos_ficha1)
+					(bind ?ficha_a_mover (* ?i 2))
+					)
+			)
+			(if (= ?puede_moverse_maq2 1) then
+				(bind ?heuristic2 (heuristico ?nueva_pos_ficha2 ?f) )
+				(if (> ?heuristic2 ?mejor_heuristico)then
+					(bind ?mejor_heuristico ?heuristic2)
+
+					(bind ?mejormobimiento ?nueva_pos_ficha2)
+					(bind ?ficha_a_mover (* ?i 2))
+					)
+			)
+
+
+
 		)
+
 	)
-
-
-	(bind ?ficha_tablero (nth$ (- (* ?num_ficha 2) 1) $?f))
-	(bind ?pos_ficha (nth$ (* ?num_ficha 2) $?f))
-	(printout t "Posicion de la ficha: " ?pos_ficha crlf)
-	
-	(printout t "A que fila la quieres mover: ")
-	(bind ?fila (read))
-	(while (or (> ?fila ?tam) (< ?fila 0)) do
-		(printout t "Esa fila está fuera del tablero: ")
-		(bind ?fila (read))
-	)
-	(bind ?fila (* ?fila 10))
-	
-	(printout t "A que columna la quieres mover: ")
-	(bind ?columna (read))
-	(while (or (> ?columna ?tam) (< ?columna 0)) do
-		(printout t "Esa columna está fuera del tablero: ")
-		(bind ?columna (read))
-	)
-	
-	(bind ?nueva_pos_ficha (+ ?fila ?columna))
-	(bind ?puede_mover 1)
-	;Si:
-	;La posicion nueva es igual a la posicion anterior + 9 o + 11 (si son blancas) -9 o -11 (si son negras)
-	(if (= ?jugIni 1) then ;Blancas
-		(if (or (= ?nueva_pos_ficha (+ ?pos_ficha 9)) (= ?nueva_pos_ficha (+ ?pos_ficha 11))) then
-			(loop-for-count (?i 1 ?tam)
-				(bind ?pos_ficha2 (nth$ (* ?i 2) $?f))
-				(if (or (= ?pos_ficha2 ?nueva_pos_ficha) (= ?pos_ficha2 ?nueva_pos_ficha)) then
-					(bind ?puede_mover 0)
-				)
-			)
-			(if (= ?puede_mover 1) then
-				(printout t "Ficha movida a: " ?nueva_pos_ficha crlf)
-				(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
-				(retract ?turnoMaq)
-				(assert (turno 2))
-
-                                ;Miramos si la posición es de victoria, es decir, que la fila sea 8. Si lo es añadimos 
-                                (if (= ?fila 80) then
-                                        (bind ?puntos (+ ?puntos 1))
-                                        (retract ?punt)
-                                        (assert (puntuacionMaquina ?puntos))
-                                )
-			else
-				(printout t "Movimiento inválido" crlf)
-				(modify ?tabl (fichas $?f))
-			)
-		else
-			(printout t "Movimiento inválido" crlf)
-			(modify ?tabl (fichas $?f))
-		)
-	else ;Negras
-		(if (or (= ?nueva_pos_ficha (- ?pos_ficha 9)) (= ?nueva_pos_ficha (- ?pos_ficha 11))) then
-			(loop-for-count (?i 1 ?tam)
-				(bind ?pos_ficha2 (nth$ (* ?i 2) $?f))
-				(if (or (= ?pos_ficha2 ?nueva_pos_ficha) (= ?pos_ficha2 ?nueva_pos_ficha)) then
-					(bind ?puede_mover 0)
-				)
-			)
-			(if (= ?puede_mover 1) then
-				(bind ?puede_mover 0)
-				(printout t "Ficha movida a: " ?nueva_pos_ficha crlf)
-				(modify ?tabl (fichas (replace$ $?f (* ?num_ficha 2) (* ?num_ficha 2) ?nueva_pos_ficha)))
-				(retract ?turnoMaq)
-				(assert (turno 2))
-
-                                ;Miramos si la posición es de victoria, es decir, que la fila sea 8. Si lo es añadimos 
-                                (if (= ?fila 10) then
-                                        (bind ?puntos (+ ?puntos 1))
-                                        (retract ?punt)
-                                        (assert (puntuacionMaquina ?puntos))
-                                )
-
-			else
-				(printout t "Movimiento inválido" crlf)
-				(modify ?tabl (fichas $?f))
-			)
-		else
-			(printout t "Movimiento inválido" crlf)
-			(modify ?tabl (fichas $?f))
-		)
-	)
+	(printout t "voy a mover la ficha " (nth$ ?ficha_a_mover $?f)"a " ?mejormobimiento crlf)
+	(modify ?tabl (fichas (replace$ $?f  ?ficha_a_mover  ?ficha_a_mover  ?mejormobimiento)))
+	(retract ?turnoMaq)
+	(assert (turno 2))
 	(assert (se_puede_comer))
 )
 
@@ -310,7 +325,7 @@
 )
 
 (deffunction efectuar_el_zampe (?posibles_comidas ?f ?control)
-	(printout t ?posibles_comidas crlf)
+	;(printout t ?posibles_comidas crlf)
 
 	(if (> (length$ ?posibles_comidas) 0) then
 		(printout t "Fichas que pueden comer:" crlf)
@@ -382,27 +397,31 @@
 
         ; Para las blancas
 	(if (or (and (= ?jugIni 1)(= ?turn 1)) (and (= ?jugIni 2)(= ?turn 2))) then
-		(bind ?puede_comer 1)
+		(printout t "hey" crlf)
 		(bind ?ya_ha_comido 0)
 		(bind $?fichas_que_comen (create$ ))
 		(loop-for-count (?i 1 (div ?tam 2))
 			(bind ?pos_ficha1 (nth$ (* ?i 2) $?f))
 			(loop-for-count (?j (+ (div ?tam 2) 1) ?tam)
+				(bind ?puede_comer 1)
 				(bind ?pos_ficha2 (nth$ (* ?j 2) $?f))
 				(if (or (= ?pos_ficha2 (+ ?pos_ficha1 9)) (= ?pos_ficha2 (+ ?pos_ficha1 11))) then
 					(printout t "primer if" crlf)
 					(bind ?diagonal (+ ?pos_ficha2 (- ?pos_ficha2 ?pos_ficha1)))
-					(if (or (!= (div ?diagonal 10 ) 0) (< (div ?diagonal 10) ?tam) (!= (mod ?diagonal 10) 0) (< (mod ?diagonal 10) ?tam )) then
+					(printout t ?diagonal crlf)
+					(if (and (!= (div ?diagonal 10 ) 0) (< (div ?diagonal 10) 9) (!= (mod ?diagonal 10) 0) (< (mod ?diagonal 10) 9 )) then
 						(printout t "segundo if" crlf) 
 						(loop-for-count (?k 1 ?tam)
 							(bind ?pos_ficha_en_diag (nth$ (* ?k 2) $?f))
-							(printout t ?diagonal " " ?pos_ficha_en_diag crlf)
+							;(printout t ?diagonal " " ?pos_ficha_en_diag crlf)
 							(if (= ?diagonal ?pos_ficha_en_diag) then
 								;Aquí puede comer
-								(printout t "en el if del puede comer" crlf)
+								;(printout t "en el if del puede comer" crlf)
 								(bind ?puede_comer 0)
 							)
 						)
+					else
+						(bind ?puede_comer 0)
 					)
 					(if (= ?puede_comer 1) then
 						(printout t "guardamos las fichas a comer" crlf)
@@ -461,18 +480,22 @@
 
         ; Para las negras
 	(if (or (and (= ?jugIni 2)(= ?turn 1)) (and (= ?jugIni 1)(= ?turn 2))) then
-		(bind ?puede_comer 1)
+		
 		(bind ?ya_ha_comido 0)
 		(bind $?fichas_que_comen (create$ ))
 		;(retract ?contr)
 		(loop-for-count (?i (+ (div ?tam 2) 1) ?tam)
 			(bind ?pos_ficha1 (nth$ (* ?i 2) $?f))
 			(loop-for-count (?j 1 (div ?tam 2))
+				(bind ?puede_comer 1)
 				(bind ?pos_ficha2 (nth$ (* ?j 2) $?f))
 				(if (or (= ?pos_ficha2 (- ?pos_ficha1 9)) (= ?pos_ficha2 (- ?pos_ficha1 11))) then
-					(printout t "primer if" crlf)
+					;(printout t "primer if" crlf)
 					(bind ?diagonal (+ ?pos_ficha2 (- ?pos_ficha2 ?pos_ficha1)))
-					(if (or (!= (div ?diagonal 10 ) 0) (< (div ?diagonal 10) ?tam) (!= (mod ?diagonal 10) 0) (< (mod ?diagonal 10) ?tam )) then
+					(printout t ?diagonal crlf)
+					;30
+					;		3!= 0			3<8			0!= 0			0  < 8
+					(if (and (!= (div ?diagonal 10 ) 0) (< (div ?diagonal 10) 9) (!= (mod ?diagonal 10) 0) (< (mod ?diagonal 10) 9)) then
 						(printout t "segundo if" crlf) 
 						(loop-for-count (?k 1 ?tam)
 							(bind ?pos_ficha_en_diag (nth$ (* ?k 2) $?f))
@@ -483,7 +506,10 @@
 								(bind ?puede_comer 0)
 							)
 						)
+					else
+						(bind ?puede_comer 0)
 					)
+
 					(if (= ?puede_comer 1) then
 						(printout t "guardamos las fichas a comer" crlf)
 						(printout t "i: " ?i " j: " ?j " diagonal: " ?diagonal crlf)
@@ -551,10 +577,12 @@
                 (printout t "Ha ganado el jugador" crlf)
                 (halt)
         )
-        ;Miramos si la mmáquina ha llegado a 2 puntos, es decir, 2 fichas en el final
+        ;Miramos si la máquina ha llegado a 2 puntos, es decir, 2 fichas en el final
         (if (= ?puntosMaquina 2) then
                 (printout t "VICTORIA" crlf)
                 (printout t "Ha ganado la maquinota" crlf)
                 (halt)
         )
 )
+
+
