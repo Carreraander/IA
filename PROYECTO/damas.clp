@@ -57,8 +57,7 @@
 			(assert (tamano 12))
 		)
 		(case 8 then
-			;(modify ?tablero (fichas o 12 o 14 o 16 o 18 o 21 o 23 o 25 o 27 o 32 o 34 o 36 o 38 x 61 x 63 x 65 x 67 x 72 x 74 x 76 x 78 x 81 x 83 x 85 x 87))
-                        (modify ?tablero (fichas o 73 o 75 o 00 o 00 o 00 o 00 o 00 o  o 00 o 00 o 00 o 00 x 00 x 63 x 00 x 00 x 00 x 00 x 00 x 0 x 00 x 00 x 00 x 00))
+			(modify ?tablero (fichas o 12 o 14 o 16 o 18 o 21 o 23 o 25 o 27 o 32 o 34 o 36 o 38 x 61 x 63 x 65 x 67 x 72 x 74 x 76 x 78 x 81 x 83 x 85 x 87))
 			(assert (tamano 24))
 		)
 	)
@@ -540,6 +539,7 @@
 )
 
 (defrule hay_victoria
+        (declare (salience 30))
         ?pPers <- (puntuacionPersona ?puntosPersona)
         ?pMaq <- (puntuacionMaquina ?puntosMaquina)
 
@@ -549,12 +549,12 @@
         (if (= ?puntosPersona 2) then
                 (printout t "VICTORIA" crlf)
                 (printout t "Ha ganado el jugador" crlf)
-                (exit)
+                (halt)
         )
         ;Miramos si la mmáquina ha llegado a 2 puntos, es decir, 2 fichas en el final
         (if (= ?puntosMaquina 2) then
                 (printout t "VICTORIA" crlf)
                 (printout t "Ha ganado la maquinota" crlf)
-                (exit)
+                (halt)
         )
 )
